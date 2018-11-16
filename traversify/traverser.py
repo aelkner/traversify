@@ -1,5 +1,9 @@
+import json
+
 class Traverser(object):
     def __init__(self, value):
+        if type(value) == type(""):
+            value = json.loads(value)
         if type(value) not in [type([]), type({})]:
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
         self.__traversify__value = value
