@@ -37,6 +37,14 @@ class Traverser(object):
         value = self().get(attr, default)
         return self.wrap_value(value)
 
+    def ensure_list(self, item):
+        value = self.get(item)
+        if value is None:
+            return None
+        if type(value) == type(self):
+            return value
+        return [value]
+
     def __getitem__(self, index):
         if type(index) == type(''):
             return self.get(index)
@@ -53,7 +61,14 @@ class Traverser(object):
             return self.wrap_value(value)
 
     def __setitem__(self, index, value):
-        self()[index] = self.unwrap_value(value)
+        def recursively_unwrap_value(recursive_value):
+            recursive_value = self.unwrap_value(recursive_value)
+            if type(recursive_value) == type([]):
+                return [recursively_unwrap_value(v) for v in recursive_value]
+            elif type(recursive_value) == type({}):
+                return dict([(k, recursively_unwrap_value(v)) for k, v in recursive_value.items()])
+            return recursive_value
+        self()[index] = recursively_unwrap_value(value)
 
     def __contains__(self, item):
         return item in self()

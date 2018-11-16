@@ -25,4 +25,3 @@ setup(
     use_2to3=True,
     package_data={'': ['LICENSE', 'README.rst']}
 )
-
