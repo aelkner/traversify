@@ -77,14 +77,20 @@ class Traverser(object):
     def __setitem__(self, index, value):
         self()[index] = recursively_unwrap_value(value)
 
+    def __eq__(self, other):
+        return self() == other()
+
     def __contains__(self, item):
-        return item in self()
+        value = self()
+        item = unwrap_value(item)
+        return item in value
 
     def __len__(self):
-        return len(self())
+        value = self()
+        return len(value) if type(value) == type([]) else 1
 
     def __bool__(self):
-        return bool(self())
+        return bool(len(self))
 
     def __delitem__(self, item):
         del self()[item]
@@ -97,14 +103,13 @@ class Traverser(object):
 
     def __iter__(self):
         value = self()
-        if type(value) in [type({}), type([])]:
-            if type(value) != type([]):
-                value = [value]
+        if type(value) == type([]):
             result = []
             for value in value:
-                result.append(Traverser(value) if type(value) in [type({}), type([])] else value)
+                result.append(Traverser(value) if traversable(value) else value)
             return iter(result)
-        return iter(self())
+        else:
+            return iter([self])
 
     def __add__(self, other):
         return Traverser(self() + unwrap_value(other))
@@ -114,4 +119,3 @@ class Traverser(object):
 
     def __deepcopy__(self, memo):
         return Traverser(deepcopy(self()))
-

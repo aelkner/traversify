@@ -50,6 +50,39 @@ class TraversalTests(unittest.TestCase):
         self.assertEqual(obj.ensure_list('item')(), ['value'])
 
 
+class BehaviorTests(unittest.TestCase):
+
+    def test_eq(self):
+        obj1 = Traverser({'item': 'value'})
+        obj2 = Traverser({'item': 'value'})
+        self.assertEqual(obj1, obj2)
+        obj2.item = 'foo'
+        self.assertNotEqual(obj1, obj2)
+
+    def test_iter(self):
+        list_obj = Traverser([123, [456, 789]])
+        self.assertEqual(list(list_obj), [123, Traverser([456, 789])])
+        singleton = Traverser({'item': 'value'})
+        self.assertEqual(list(singleton), [singleton])
+
+    def test_contains(self):
+        list_obj = Traverser([123, [456, 789]])
+        self.assertTrue(123 in list_obj)
+        self.assertTrue([456, 789] in list_obj)
+        self.assertTrue(Traverser([456, 789]) in list_obj)
+        self.assertFalse(456 in list_obj)
+
+    def test_len(self):
+        self.assertEqual(len(Traverser([123, [456, 789]])), 2)
+        self.assertEqual(len(Traverser([])), 0)
+        self.assertEqual(len(Traverser({})), 1)
+
+    def test_bool(self):
+        self.assertTrue(Traverser([123]))
+        self.assertFalse(Traverser([]))
+        self.assertTrue(Traverser({}))
+
+
 class UpdativeTests(unittest.TestCase):
 
     def test_setitem(self):
