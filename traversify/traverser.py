@@ -1,10 +1,32 @@
 import json
 
+
+def traversable(value):
+    return type(value) in [type([]), type({})]
+
+
+def wrap_value(value):
+    return Traverser(value) if type(value) in [type({}), type([])] else value
+
+
+def unwrap_value(value):
+    return value() if isinstance(value, Traverser) else value
+
+
+def recursively_unwrap_value(recursive_value):
+    recursive_value = unwrap_value(recursive_value)
+    if type(recursive_value) == type([]):
+        return [recursively_unwrap_value(v) for v in recursive_value]
+    elif type(recursive_value) == type({}):
+        return dict([(k, recursively_unwrap_value(v)) for k, v in recursive_value.items()])
+    return recursive_value
+
+
 class Traverser(object):
     def __init__(self, value):
         if type(value) == type(""):
             value = json.loads(value)
-        if type(value) not in [type([]), type({})]:
+        if not traversable(value):
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
         self.__traversify__value = value
 
@@ -25,17 +47,9 @@ class Traverser(object):
     def __repr__(self):
         return 'Traverser({})'.format(self())
 
-    @staticmethod
-    def wrap_value(value):
-        return Traverser(value) if type(value) in [type({}), type([])] else value
-
-    @staticmethod
-    def unwrap_value(value):
-        return value() if isinstance(value, Traverser) else value
-
     def get(self, attr, default=None):
         value = self().get(attr, default)
-        return self.wrap_value(value)
+        return wrap_value(value)
 
     def ensure_list(self, item):
         value = self.get(item)
@@ -58,16 +72,9 @@ class Traverser(object):
                 value = value[start:stop]
             else:
                 value = value[index]
-            return self.wrap_value(value)
+            return wrap_value(value)
 
     def __setitem__(self, index, value):
-        def recursively_unwrap_value(recursive_value):
-            recursive_value = self.unwrap_value(recursive_value)
-            if type(recursive_value) == type([]):
-                return [recursively_unwrap_value(v) for v in recursive_value]
-            elif type(recursive_value) == type({}):
-                return dict([(k, recursively_unwrap_value(v)) for k, v in recursive_value.items()])
-            return recursive_value
         self()[index] = recursively_unwrap_value(value)
 
     def __contains__(self, item):
@@ -83,7 +90,7 @@ class Traverser(object):
         del self()[item]
 
     def append(self, other):
-        self().append(self.unwrap_value(other))
+        self().append(unwrap_value(other))
 
     def __delattr__(self, item):
         del self()[item]
@@ -100,7 +107,7 @@ class Traverser(object):
         return iter(self())
 
     def __add__(self, other):
-        return Traverser(self() + self.unwrap_value(other))
+        return Traverser(self() + unwrap_value(other))
 
     def __copy__(self):
         return Traverser(copy(self()))
