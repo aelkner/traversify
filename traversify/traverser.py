@@ -22,6 +22,10 @@ def recursively_unwrap_value(recursive_value):
     return recursive_value
 
 
+def ensure_list(value):
+    return value if type(value) == type([]) else [value]
+
+
 class Traverser(object):
     def __init__(self, value):
         if type(value) == type(""):
@@ -95,8 +99,21 @@ class Traverser(object):
     def __delitem__(self, item):
         del self()[item]
 
-    def append(self, other):
-        self().append(unwrap_value(other))
+    def append(self, item):
+        value = self()
+        item = unwrap_value(item)
+        if type(value) == type([]):
+            value.append(item)
+        else:
+            self.__traversify__value = [value, item]
+
+    def extend(self, item):
+        value = self()
+        items = ensure_list(unwrap_value(item))
+        if type(value) == type([]):
+            value.extend(items)
+        else:
+            self.__traversify__value = [value] + items
 
     def __delattr__(self, item):
         del self()[item]
@@ -111,8 +128,10 @@ class Traverser(object):
         else:
             return iter([self])
 
-    def __add__(self, other):
-        return Traverser(self() + unwrap_value(other))
+    def __add__(self, item):
+        value = ensure_list(self())
+        item = ensure_list(unwrap_value(item))
+        return Traverser(value + item)
 
     def __copy__(self):
         return Traverser(copy(self()))

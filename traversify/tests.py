@@ -82,6 +82,19 @@ class BehaviorTests(unittest.TestCase):
         self.assertFalse(Traverser([]))
         self.assertTrue(Traverser({}))
 
+    def test_add(self):
+        obj = Traverser([{'username': 'jdoe'}])
+        sum = obj + {'username': 'any'}
+        self.assertEqual(sum(), [{'username': 'jdoe'}, {'username': 'any'}])
+        sum = obj + Traverser({'username': 'any'})
+        self.assertEqual(sum(), [{'username': 'jdoe'}, {'username': 'any'}])
+
+        obj = Traverser({'username': 'jdoe'})
+        sum = obj + {'username': 'any'}
+        self.assertEqual(sum(), [{'username': 'jdoe'}, {'username': 'any'}])
+        sum = obj + Traverser({'username': 'any'})
+        self.assertEqual(sum(), [{'username': 'jdoe'}, {'username': 'any'}])
+
 
 class UpdativeTests(unittest.TestCase):
 
@@ -98,6 +111,36 @@ class UpdativeTests(unittest.TestCase):
         self.assertEqual(obj.list_has_traverser(), [[123], 456])
         obj.dict_has_traverser = {'has_traverser': Traverser([123]), 'no_traverser': 456}
         self.assertEqual(sorted(obj.dict_has_traverser().items()), [('has_traverser', [123]), ('no_traverser', 456)])
+
+    def test_append(self):
+        obj = Traverser([{'username': 'jdoe'}])
+        obj.append({'username': 'any'})
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+        obj = Traverser([{'username': 'jdoe'}])
+        obj.append(Traverser({'username': 'any'}))
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+
+        obj = Traverser({'username': 'jdoe'})
+        obj.append({'username': 'any'})
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+        obj = Traverser({'username': 'jdoe'})
+        obj.append(Traverser({'username': 'any'}))
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+
+    def test_extend(self):
+        obj = Traverser([{'username': 'jdoe'}])
+        obj.extend([{'username': 'any'}])
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+        obj = Traverser([{'username': 'jdoe'}])
+        obj.extend(Traverser([{'username': 'any'}]))
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+
+        obj = Traverser({'username': 'jdoe'})
+        obj.extend([{'username': 'any'}])
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+        obj = Traverser({'username': 'jdoe'})
+        obj.extend(Traverser([{'username': 'any'}]))
+        self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
 
 
 if __name__ == '__main__':
