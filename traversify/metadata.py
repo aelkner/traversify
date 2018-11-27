@@ -1,4 +1,4 @@
-__version__ = "1.0.0"
+__version__ = "0.0.1"
 __author__ = "Alan Elkner"
 __copyright__ = "Copyright 2018, Alan Elkner"
 __maintainer__ = "Alan Elkner"
