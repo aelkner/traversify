@@ -89,6 +89,7 @@ class BehaviorTests(unittest.TestCase):
         sum = obj + Traverser({'username': 'any'})
         self.assertEqual(sum(), [{'username': 'jdoe'}, {'username': 'any'}])
 
+    def test_add_to_singleton(self):
         obj = Traverser({'username': 'jdoe'})
         sum = obj + {'username': 'any'}
         self.assertEqual(sum(), [{'username': 'jdoe'}, {'username': 'any'}])
@@ -107,6 +108,9 @@ class UpdativeTests(unittest.TestCase):
         self.assertEqual(obj.id, 123)
         obj.roles = ['admin', 'any_user']
         self.assertEqual(obj.roles(), ['admin', 'any_user'])
+
+    def test_setitem_needing_recursive_unwrap(self):
+        obj = Traverser({})
         obj.list_has_traverser = [Traverser([123]), 456]
         self.assertEqual(obj.list_has_traverser(), [[123], 456])
         obj.dict_has_traverser = {'has_traverser': Traverser([123]), 'no_traverser': 456}
@@ -120,6 +124,7 @@ class UpdativeTests(unittest.TestCase):
         obj.append(Traverser({'username': 'any'}))
         self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
 
+    def test_append_to_singleton(self):
         obj = Traverser({'username': 'jdoe'})
         obj.append({'username': 'any'})
         self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
@@ -135,6 +140,7 @@ class UpdativeTests(unittest.TestCase):
         obj.extend(Traverser([{'username': 'any'}]))
         self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
 
+    def test_extend_singleton(self):
         obj = Traverser({'username': 'jdoe'})
         obj.extend([{'username': 'any'}])
         self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
