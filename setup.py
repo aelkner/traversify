@@ -15,6 +15,7 @@ setup(
     url='https://github.com/aelkner/traversify',
     license=traversify.__license__,
     long_description=long_description,
+    long_description_content_type='text/markdown',
     description='Handy python wrapper class for json data that makes it easier to traverse to items and list elements.',
     author=traversify.__author__,
     author_email=traversify.__email__,
