@@ -32,6 +32,8 @@ class Traverser(object):
             value = json.loads(value)
         if not traversable(value):
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
+        if type(value) == type({}):
+            self.__dict__.update(value)
         self.__traversify__value = value
 
     def __call__(self):

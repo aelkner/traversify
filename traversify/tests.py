@@ -52,6 +52,10 @@ class TraversalTests(unittest.TestCase):
 
 class BehaviorTests(unittest.TestCase):
 
+    def test_ide_support(self):
+        obj = Traverser({'item': 'value'})
+        self.assertEqual(obj.__dict__['item'], 'value')
+
     def test_eq(self):
         obj1 = Traverser({'item': 'value'})
         obj2 = Traverser({'item': 'value'})
