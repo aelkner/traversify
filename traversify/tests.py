@@ -6,6 +6,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from traversify import Traverser
 
 
+class MockResponse(object):
+    def __init__(self, data):
+        self.data = data
+
+    def json(self):
+        return self.data
+
+
 class ConstructorTests(unittest.TestCase):
 
     def test_invalid(self):
@@ -29,6 +37,10 @@ class ConstructorTests(unittest.TestCase):
         self.assertEqual(obj(), [])
         obj = Traverser("{}")
         self.assertEqual(obj(), {})
+
+    def test_response_object_with_json_method(self):
+        obj = Traverser(MockResponse('[]'))
+        self.assertEqual(obj, [])
 
 
 class TraversalTests(unittest.TestCase):

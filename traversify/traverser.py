@@ -28,6 +28,8 @@ def ensure_list(value):
 
 class Traverser(object):
     def __init__(self, value):
+        if hasattr(value, 'json') and value.json.__class__.__name__ == 'instancemethod':
+            value = value.json()
         if type(value) == type(""):
             value = json.loads(value)
         if not traversable(value):
