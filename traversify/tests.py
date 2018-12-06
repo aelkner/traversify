@@ -49,12 +49,28 @@ class TraversalTests(unittest.TestCase):
         obj = Traverser({'item': ['value']})
         self.assertEqual(obj.ensure_list('item')(), ['value'])
 
+    def test_traversal_to_traverser_node(self):
+        obj = Traverser({'item': {'key': 'value'}})
+        self.assertEqual(obj.item, {'key': 'value'})
+        self.assertEqual(obj.item.__class__.__name__, 'Traverser')
+        self.assertEqual(obj.__dict__['item'], {'key': 'value'})
+        self.assertEqual(obj.__dict__['item'].__class__.__name__, 'Traverser')
 
 class BehaviorTests(unittest.TestCase):
 
     def test_ide_support(self):
-        obj = Traverser({'item': 'value'})
+        obj = Traverser({'item': 'value', 'item_list': [1, 2]})
         self.assertEqual(obj.__dict__['item'], 'value')
+        self.assertEqual(obj.item, 'value')
+        self.assertEqual(obj.__dict__['item_list'], [1, 2])
+        self.assertEqual(obj.__dict__['item_list'].__class__.__name__, 'Traverser')
+        self.assertEqual(obj.item_list, [1, 2])
+        self.assertEqual(obj.item_list.__class__.__name__, 'Traverser')
+        obj.new_list = [3, 4]
+        self.assertEqual(obj.__dict__['new_list'], [3, 4])
+        self.assertEqual(obj.__dict__['new_list'].__class__.__name__, 'Traverser')
+        self.assertEqual(obj.new_list, [3, 4])
+        self.assertEqual(obj.new_list.__class__.__name__, 'Traverser')
 
     def test_eq(self):
         obj1 = Traverser({'item': 'value'})

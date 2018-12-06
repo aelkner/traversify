@@ -33,7 +33,9 @@ class Traverser(object):
         if not traversable(value):
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
         if type(value) == type({}):
-            self.__dict__.update(value)
+            for k, v in value.items():
+                if k not in self.__dict__:
+                    self.__dict__[k] = wrap_value(v)
         self.__traversify__value = value
 
     def __call__(self):
@@ -82,9 +84,11 @@ class Traverser(object):
 
     def __setitem__(self, index, value):
         self()[index] = recursively_unwrap_value(value)
+        if index not in self.__dict__:
+            self.__dict__[index] = wrap_value(self()[index])
 
     def __eq__(self, other):
-        return self() == other()
+        return self() == unwrap_value(other)
 
     def __contains__(self, item):
         value = self()
