@@ -68,6 +68,7 @@ class TraversalTests(unittest.TestCase):
         self.assertEqual(obj.__dict__['item'], {'key': 'value'})
         self.assertEqual(obj.__dict__['item'].__class__.__name__, 'Traverser')
 
+
 class BehaviorTests(unittest.TestCase):
 
     def test_ide_support(self):
@@ -140,6 +141,13 @@ class UpdativeTests(unittest.TestCase):
         self.assertEqual(obj.id, 123)
         obj.roles = ['admin', 'any_user']
         self.assertEqual(obj.roles(), ['admin', 'any_user'])
+
+    def test_setitem_updates_attributes_dict_correctly(self):
+        obj = Traverser({})
+        obj.new_attr = 'orig_value'
+        self.assertEqual(obj.new_attr, 'orig_value')
+        obj.new_attr = 'new_value'
+        self.assertEqual(obj.new_attr, 'new_value')
 
     def test_setitem_needing_recursive_unwrap(self):
         obj = Traverser({})
