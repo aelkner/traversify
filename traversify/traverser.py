@@ -1,4 +1,5 @@
 import json
+import inspect
 
 
 def traversable(value):
@@ -28,7 +29,7 @@ def ensure_list(value):
 
 class Traverser(object):
     def __init__(self, value):
-        if hasattr(value, 'json') and value.json.__class__.__name__ == 'instancemethod':
+        if hasattr(value, 'json') and inspect.ismethod(value.json):
             value = value.json()
         if type(value) == type(""):
             value = json.loads(value)
