@@ -3,7 +3,7 @@ import sys
 import unittest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-from traversify import Traverser
+from traversify import Traverser, Comparator
 
 
 class MockResponse(object):
@@ -187,6 +187,30 @@ class UpdativeTests(unittest.TestCase):
         obj = Traverser({'username': 'jdoe'})
         obj.extend(Traverser([{'username': 'any'}]))
         self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
+
+
+class ComparatorTests(unittest.TestCase):
+
+    def test_blacklist(self):
+        id_comparator = Comparator(blacklist='id')
+        left = {'id': 1, 'username': 'jdoe'}
+        right = {'username': 'jdoe'}
+        self.assertTrue(id_comparator(left, right))
+        self.assertTrue(id_comparator(Traverser(left), Traverser(right)))
+
+    def test_whitelist(self):
+        username_comparator = Comparator(whitelist='username')
+        left = {'id': 1, 'username': 'jdoe'}
+        right = {'username': 'jdoe'}
+        self.assertTrue(username_comparator(left, right))
+        self.assertTrue(username_comparator(Traverser(left), Traverser(right)))
+
+    def test_eq_with_comparator(self):
+        id_comparator = Comparator(blacklist='id')
+        left = Traverser({'id': 1, 'username': 'jdoe'}, comparator=id_comparator)
+        right = Traverser({'username': 'jdoe'})
+        self.assertTrue(left == right)
+        self.assertFalse(right == left)
 
 
 if __name__ == '__main__':

@@ -6,8 +6,8 @@ def traversable(value):
     return type(value) in [type([]), type({})]
 
 
-def wrap_value(value):
-    return Traverser(value) if type(value) in [type({}), type([])] else value
+def wrap_value(value, comparator=None):
+    return Traverser(value, comparator) if type(value) in [type({}), type([])] else value
 
 
 def unwrap_value(value):
@@ -28,7 +28,7 @@ def ensure_list(value):
 
 
 class Traverser(object):
-    def __init__(self, value):
+    def __init__(self, value, comparator=None):
         if hasattr(value, 'json') and inspect.ismethod(value.json):
             value = value.json()
         if type(value) == type(""):
@@ -40,19 +40,22 @@ class Traverser(object):
             for k, v in value.items():
                 if k not in protect_attrs:
                     self.__dict__[k] = wrap_value(v)
-        self.__traversify__value = value
+        self.__traverser__internals__ = {
+            'value': value,
+            'comparator': comparator,
+        }
 
     def __call__(self):
-        return self.__traversify__value
+        return self.__traverser__internals__['value']
 
     def __getattr__(self, attr, default=None):
-        if '__traversify__value' in attr:
-            return super(Traverser, self).__getattribute__('__traversify__value')
+        if '__traverser__internals__' in attr:
+            return super(Traverser, self).__getattribute__('__traverser__internals__')
         return self.get(attr, default)
 
     def __setattr__(self, attr, value):
-        if '__traversify__value' in attr:
-            super(Traverser, self).__setattr__('__traversify__value',  value)
+        if '__traverser__internals__' in attr:
+            super(Traverser, self).__setattr__('__traverser__internals__',  value)
         else:
             self[attr] = value
 
@@ -92,7 +95,10 @@ class Traverser(object):
             self.__dict__[index] = wrap_value(self()[index])
 
     def __eq__(self, other):
-        return self() == unwrap_value(other)
+        if self.__traverser__internals__['comparator'] is None:
+            return self() == unwrap_value(other)
+        else:
+            return self.__traverser__internals__['comparator'](self, other)
 
     def __contains__(self, item):
         value = self()
@@ -115,7 +121,7 @@ class Traverser(object):
         if type(value) == type([]):
             value.append(item)
         else:
-            self.__traversify__value = [value, item]
+            self.__traverser__internals__['value'] = [value, item]
 
     def extend(self, item):
         value = self()
@@ -123,7 +129,7 @@ class Traverser(object):
         if type(value) == type([]):
             value.extend(items)
         else:
-            self.__traversify__value = [value] + items
+            self.__traverser__internals__['value'] = [value] + items
 
     def __delattr__(self, item):
         del self()[item]
@@ -148,3 +154,40 @@ class Traverser(object):
 
     def __deepcopy__(self, memo):
         return Traverser(deepcopy(self()))
+
+
+class Comparator(object):
+    def __init__(self, blacklist=None, whitelist=None):
+        self.blacklist = [] if blacklist is None else ensure_list(blacklist)
+        self.whitelist = [] if whitelist is None else ensure_list(whitelist)
+
+    def __call__(self, left, right):
+        left_value = unwrap_value(left)
+        right_value = unwrap_value(right)
+
+        if type(left_value) == type(right_value) == type([]):
+            if len(left_value) != len(right_value):
+                return False
+            for index, item in enumerate(left_value):
+                if not self(item, right_value[index]):
+                    return False
+            return True
+
+        elif type(left_value) == type(right_value) == type({}):
+            left_keys = sorted(left_value.keys())
+            right_keys = sorted(right_value.keys())
+            if self.blacklist:
+                left_keys = [k for k in left_keys if k not in self.blacklist]
+                right_keys = [k for k in right_keys if k not in self.blacklist]
+            if self.whitelist:
+                left_keys = [k for k in left_keys if k in self.blacklist]
+                right_keys = [k for k in right_keys if k in self.blacklist]
+            if left_keys != right_keys:
+                return False
+            for key in left_keys:
+                if not self(left_value[key], right_value[key]):
+                    return False
+            return True
+
+        else:
+            return left_value == right_value
