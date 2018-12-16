@@ -3,11 +3,11 @@ import inspect
 
 
 def traversable(value):
-    return type(value) in [type([]), type({})]
+    return type(value) in [list, dict]
 
 
 def wrap_value(value, comparator=None):
-    return Traverser(value, comparator) if type(value) in [type({}), type([])] else value
+    return Traverser(value, comparator) if type(value) in [list, dict] else value
 
 
 def unwrap_value(value):
@@ -16,15 +16,15 @@ def unwrap_value(value):
 
 def recursively_unwrap_value(recursive_value):
     recursive_value = unwrap_value(recursive_value)
-    if type(recursive_value) == type([]):
+    if type(recursive_value) == list:
         return [recursively_unwrap_value(v) for v in recursive_value]
-    elif type(recursive_value) == type({}):
+    elif type(recursive_value) == dict:
         return dict([(k, recursively_unwrap_value(v)) for k, v in recursive_value.items()])
     return recursive_value
 
 
 def ensure_list(value):
-    return value if type(value) == type([]) else [value]
+    return value if type(value) == list else [value]
 
 
 class Traverser(object):
@@ -35,7 +35,7 @@ class Traverser(object):
             value = json.loads(value)
         if not traversable(value):
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
-        if type(value) == type({}):
+        if type(value) == dict:
             protect_attrs = dir(Traverser)
             for k, v in value.items():
                 if k not in protect_attrs:
@@ -79,7 +79,7 @@ class Traverser(object):
             return self.get(index)
         else:
             value = self()
-            if type(value) != type([]):
+            if type(value) != list:
                 value = [value]
             if type(index) == type(slice(0)):
                 start = 0 if index.start is None else index.start
@@ -107,7 +107,7 @@ class Traverser(object):
 
     def __len__(self):
         value = self()
-        return len(value) if type(value) == type([]) else 1
+        return len(value) if type(value) == list else 1
 
     def __bool__(self):
         return bool(len(self))
@@ -118,7 +118,7 @@ class Traverser(object):
     def append(self, item):
         value = self()
         item = unwrap_value(item)
-        if type(value) == type([]):
+        if type(value) == list:
             value.append(item)
         else:
             self.__traverser__internals__['value'] = [value, item]
@@ -126,7 +126,7 @@ class Traverser(object):
     def extend(self, item):
         value = self()
         items = ensure_list(unwrap_value(item))
-        if type(value) == type([]):
+        if type(value) == list:
             value.extend(items)
         else:
             self.__traverser__internals__['value'] = [value] + items
@@ -136,7 +136,7 @@ class Traverser(object):
 
     def __iter__(self):
         value = self()
-        if type(value) == type([]):
+        if type(value) == list:
             result = []
             for value in value:
                 result.append(Traverser(value) if traversable(value) else value)
@@ -165,7 +165,7 @@ class Comparator(object):
         left_value = unwrap_value(left)
         right_value = unwrap_value(right)
 
-        if type(left_value) == type(right_value) == type([]):
+        if type(left_value) == type(right_value) == list:
             if len(left_value) != len(right_value):
                 return False
             for index, item in enumerate(left_value):
@@ -173,7 +173,7 @@ class Comparator(object):
                     return False
             return True
 
-        elif type(left_value) == type(right_value) == type({}):
+        elif type(left_value) == type(right_value) == dict:
             left_keys = sorted(left_value.keys())
             right_keys = sorted(right_value.keys())
             if self.blacklist:
