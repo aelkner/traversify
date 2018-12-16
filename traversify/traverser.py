@@ -100,6 +100,10 @@ class Traverser(object):
         else:
             return self.__traverser__internals__['comparator'](self, other)
 
+    def prune(self):
+        if self.__traverser__internals__['comparator'] is not None:
+            self.__traverser__internals__['comparator'].prune(self)
+
     def __contains__(self, item):
         value = self()
         item = unwrap_value(item)
@@ -191,3 +195,22 @@ class Comparator(object):
 
         else:
             return left_value == right_value
+
+    def prune(self, value):
+        value = unwrap_value(value)
+
+        if type(value) == list:
+            for item in value:
+                self.prune(item)
+
+        elif type(value) == dict:
+            keys = list(value.keys())
+            if self.blacklist:
+                keys = [k for k in keys if k not in self.blacklist]
+            if self.whitelist:
+                keys = [k for k in keys if k in self.blacklist]
+            for key in list(value.keys()):
+                if key in keys:
+                    self.prune(value[key])
+                else:
+                    del value[key]

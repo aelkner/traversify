@@ -212,6 +212,23 @@ class ComparatorTests(unittest.TestCase):
         self.assertTrue(left == right)
         self.assertFalse(right == left)
 
+    def test_prune(self):
+        id_comparator = Comparator(blacklist='id')
+        obj = {'id': 1, 'username': 'jdoe'}
+        id_comparator.prune(obj)
+        self.assertTrue(obj == {'username': 'jdoe'})
+
+    def test_traverser_prune_no_comparator(self):
+        obj = Traverser({'id': 1, 'username': 'jdoe'})
+        obj.prune()
+        self.assertTrue(obj() == {'id': 1, 'username': 'jdoe'})
+
+    def test_traverser_prune_with_comparator(self):
+        id_comparator = Comparator(blacklist='id')
+        obj = Traverser({'id': 1, 'username': 'jdoe'}, comparator=id_comparator)
+        obj.prune()
+        self.assertTrue(obj() == {'username': 'jdoe'})
+
 
 if __name__ == '__main__':
     unittest.main()
