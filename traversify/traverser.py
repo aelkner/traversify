@@ -100,9 +100,11 @@ class Traverser(object):
         else:
             return self.__traverser__internals__['comparator'](self, other)
 
-    def prune(self):
-        if self.__traverser__internals__['comparator'] is not None:
-            self.__traverser__internals__['comparator'].prune(self)
+    def prune(self, comparator=None):
+        if comparator is None:
+            comparator = self.__traverser__internals__['comparator']
+        if comparator is not None:
+            comparator.prune(self)
 
     def __contains__(self, item):
         value = self()
