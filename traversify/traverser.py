@@ -105,6 +105,7 @@ class Traverser(object):
             comparator = self.__traverser__internals__['comparator']
         if comparator is not None:
             comparator.prune(self)
+        return self
 
     def __contains__(self, item):
         value = self()
@@ -128,6 +129,7 @@ class Traverser(object):
             value.append(item)
         else:
             self.__traverser__internals__['value'] = [value, item]
+        return self
 
     def extend(self, item):
         value = self()
@@ -136,6 +138,7 @@ class Traverser(object):
             value.extend(items)
         else:
             self.__traverser__internals__['value'] = [value] + items
+        return self
 
     def __delattr__(self, item):
         del self()[item]

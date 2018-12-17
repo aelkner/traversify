@@ -238,5 +238,20 @@ class ComparatorTests(unittest.TestCase):
         self.assertTrue(obj() == {'username': 'jdoe'})
 
 
+class CallChainingTests(unittest.TestCase):
+
+    def test_prune_call_chain(self):
+        obj = Traverser({})
+        self.assertTrue(obj.prune() is obj)
+
+    def test_append_call_chain(self):
+        obj = Traverser([])
+        self.assertTrue(obj.append({}) is obj)
+
+    def test_extend_call_chain(self):
+        obj = Traverser([])
+        self.assertTrue(obj.extend([]) is obj)
+
+
 if __name__ == '__main__':
     unittest.main()
