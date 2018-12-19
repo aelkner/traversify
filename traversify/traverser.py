@@ -6,8 +6,8 @@ def traversable(value):
     return type(value) in [list, dict]
 
 
-def wrap_value(value, comparator=None):
-    return Traverser(value, comparator) if type(value) in [list, dict] else value
+def wrap_value(value, filter=None):
+    return Traverser(value, filter=filter) if type(value) in [list, dict] else value
 
 
 def unwrap_value(value):
@@ -28,7 +28,7 @@ def ensure_list(value):
 
 
 class Traverser(object):
-    def __init__(self, value, comparator=None):
+    def __init__(self, value, filter=None):
         if hasattr(value, 'json') and inspect.ismethod(value.json):
             value = value.json()
         if type(value) == type(""):
@@ -42,7 +42,7 @@ class Traverser(object):
                     self.__dict__[k] = wrap_value(v)
         self.__traverser__internals__ = {
             'value': value,
-            'comparator': comparator,
+            'filter': filter,
         }
 
     def __call__(self):
@@ -95,16 +95,16 @@ class Traverser(object):
             self.__dict__[index] = wrap_value(self()[index])
 
     def __eq__(self, other):
-        if self.__traverser__internals__['comparator'] is None:
+        if self.__traverser__internals__['filter'] is None:
             return self() == unwrap_value(other)
         else:
-            return self.__traverser__internals__['comparator'](self, other)
+            return self.__traverser__internals__['filter'].are_equal(self, other)
 
-    def prune(self, comparator=None):
-        if comparator is None:
-            comparator = self.__traverser__internals__['comparator']
-        if comparator is not None:
-            comparator.prune(self)
+    def prune(self, filter=None):
+        if filter is None:
+            filter = self.__traverser__internals__['filter']
+        if filter is not None:
+            filter.prune(self)
         return self
 
     def __contains__(self, item):
@@ -165,12 +165,12 @@ class Traverser(object):
         return Traverser(deepcopy(self()))
 
 
-class Comparator(object):
+class Filter(object):
     def __init__(self, blacklist=None, whitelist=None):
         self.blacklist = [] if blacklist is None else ensure_list(blacklist)
         self.whitelist = [] if whitelist is None else ensure_list(whitelist)
 
-    def __call__(self, left, right):
+    def are_equal(self, left, right):
         left_value = unwrap_value(left)
         right_value = unwrap_value(right)
 
@@ -178,7 +178,7 @@ class Comparator(object):
             if len(left_value) != len(right_value):
                 return False
             for index, item in enumerate(left_value):
-                if not self(item, right_value[index]):
+                if not self.are_equal(item, right_value[index]):
                     return False
             return True
 
@@ -194,7 +194,7 @@ class Comparator(object):
             if left_keys != right_keys:
                 return False
             for key in left_keys:
-                if not self(left_value[key], right_value[key]):
+                if not self.are_equal(left_value[key], right_value[key]):
                     return False
             return True
 

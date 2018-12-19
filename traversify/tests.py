@@ -3,7 +3,7 @@ import sys
 import unittest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-from traversify import Traverser, Comparator
+from traversify import Traverser, Filter
 
 
 class MockResponse(object):
@@ -189,52 +189,52 @@ class UpdativeTests(unittest.TestCase):
         self.assertEqual(obj(), [{'username': 'jdoe'}, {'username': 'any'}])
 
 
-class ComparatorTests(unittest.TestCase):
+class FilterTests(unittest.TestCase):
 
     def test_blacklist(self):
-        id_comparator = Comparator(blacklist='id')
+        id_filter = Filter(blacklist='id')
         left = {'id': 1, 'username': 'jdoe'}
         right = {'username': 'jdoe'}
-        self.assertTrue(id_comparator(left, right))
-        self.assertTrue(id_comparator(Traverser(left), Traverser(right)))
+        self.assertTrue(id_filter.are_equal(left, right))
+        self.assertTrue(id_filter.are_equal(Traverser(left), Traverser(right)))
 
     def test_whitelist(self):
-        username_comparator = Comparator(whitelist='username')
+        username_filter = Filter(whitelist='username')
         left = {'id': 1, 'username': 'jdoe'}
         right = {'username': 'jdoe'}
-        self.assertTrue(username_comparator(left, right))
-        self.assertTrue(username_comparator(Traverser(left), Traverser(right)))
+        self.assertTrue(username_filter.are_equal(left, right))
+        self.assertTrue(username_filter.are_equal(Traverser(left), Traverser(right)))
 
-    def test_eq_with_comparator(self):
-        id_comparator = Comparator(blacklist='id')
-        left = Traverser({'id': 1, 'username': 'jdoe'}, comparator=id_comparator)
+    def test_eq_with_filter(self):
+        id_filter = Filter(blacklist='id')
+        left = Traverser({'id': 1, 'username': 'jdoe'}, filter=id_filter)
         right = Traverser({'username': 'jdoe'})
         self.assertTrue(left == right)
         self.assertFalse(right == left)
 
     def test_prune(self):
-        id_comparator = Comparator(blacklist='id')
+        id_filter = Filter(blacklist='id')
         obj = {'id': 1, 'username': 'jdoe'}
-        id_comparator.prune(obj)
+        id_filter.prune(obj)
         self.assertTrue(obj == {'username': 'jdoe'})
 
-    def test_traverser_prune_no_comparator(self):
+    def test_traverser_prune_no_filter(self):
         obj = Traverser({'id': 1, 'username': 'jdoe'})
         obj.prune()
         self.assertTrue(obj() == {'id': 1, 'username': 'jdoe'})
 
-    def test_traverser_prune_with_comparator(self):
-        id_comparator = Comparator(blacklist='id')
-        obj = Traverser({'id': 1, 'username': 'jdoe'}, comparator=id_comparator)
+    def test_traverser_prune_with_filter(self):
+        id_filter = Filter(blacklist='id')
+        obj = Traverser({'id': 1, 'username': 'jdoe'}, filter=id_filter)
         obj.prune()
         self.assertTrue(obj() == {'username': 'jdoe'})
 
-    def test_traverser_prune_called_with_comparator(self):
-        id_comparator = Comparator(blacklist='id')
+    def test_traverser_prune_called_with_filter(self):
+        id_filter = Filter(blacklist='id')
         obj = Traverser({'id': 1, 'username': 'jdoe'})
         obj.prune()
         self.assertTrue(obj() == {'id': 1, 'username': 'jdoe'})
-        obj.prune(comparator=id_comparator)
+        obj.prune(filter=id_filter)
         self.assertTrue(obj() == {'username': 'jdoe'})
 
 

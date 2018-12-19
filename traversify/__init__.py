@@ -7,7 +7,7 @@ traversify
 
 """
 
-from .traverser import Traverser, Comparator
+from .traverser import Traverser, Filter
 from .metadata import (
     __author__,
     __copyright__,
