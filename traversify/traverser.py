@@ -6,8 +6,8 @@ def traversable(value):
     return type(value) in [list, dict]
 
 
-def wrap_value(value, filter=None):
-    return Traverser(value, filter=filter) if type(value) in [list, dict] else value
+def wrap_value(value, deepcopy=False, filter=None):
+    return Traverser(value, deepcopy=deepcopy, filter=filter) if type(value) in [list, dict] else value
 
 
 def unwrap_value(value):
@@ -28,13 +28,15 @@ def ensure_list(value):
 
 
 class Traverser(object):
-    def __init__(self, value, filter=None):
+    def __init__(self, value, deepcopy=True, filter=None):
         if hasattr(value, 'json') and inspect.ismethod(value.json):
             value = value.json()
         if type(value) == type(""):
             value = json.loads(value)
         if not traversable(value):
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
+        if deepcopy:
+            value = recursively_unwrap_value(value)
         if type(value) == dict:
             protect_attrs = dir(Traverser)
             for k, v in value.items():

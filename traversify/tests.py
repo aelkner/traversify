@@ -42,6 +42,19 @@ class ConstructorTests(unittest.TestCase):
         obj = Traverser(MockResponse('[]'))
         self.assertEqual(obj, [])
 
+    def test_deepcopy_causes_no_side_effects(self):
+        value = {'id': 0}
+        obj = Traverser(value)
+        obj.id = 1
+        self.assertEqual(obj(), {'id': 1})
+        self.assertEqual(value, {'id': 0})
+
+    def test_no_deepcopy_causes_intended_side_effects(self):
+        value = {'id': 0}
+        obj = Traverser(value, deepcopy=False)
+        obj.id = 1
+        self.assertEqual(obj(), {'id': 1})
+        self.assertEqual(value, {'id': 1})
 
 class ConversionToJSONTests(unittest.TestCase):
 
@@ -164,6 +177,13 @@ class UpdativeTests(unittest.TestCase):
         self.assertEqual(obj.list_has_traverser(), [[123], 456])
         obj.dict_has_traverser = {'has_traverser': Traverser([123]), 'no_traverser': 456}
         self.assertEqual(sorted(obj.dict_has_traverser().items()), [('has_traverser', [123]), ('no_traverser', 456)])
+
+    def test_setitem_has_no_side_effects(self):
+        value = {'username': 'jdoe'}
+        obj = Traverser(value)
+        obj.id = 1
+        self.assertEqual(obj(), {'username': 'jdoe', 'id': 1})
+        self.assertEqual(value, {'username': 'jdoe'})
 
     def test_append(self):
         obj = Traverser([{'username': 'jdoe'}])
