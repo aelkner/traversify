@@ -196,6 +196,8 @@ class FilterTests(unittest.TestCase):
         left = {'id': 1, 'username': 'jdoe'}
         right = {'username': 'jdoe'}
         self.assertTrue(id_filter.are_equal(left, right))
+        self.assertTrue(id_filter.are_equal(left, Traverser(right)))
+        self.assertTrue(id_filter.are_equal(Traverser(left), right))
         self.assertTrue(id_filter.are_equal(Traverser(left), Traverser(right)))
 
     def test_whitelist(self):
@@ -203,6 +205,8 @@ class FilterTests(unittest.TestCase):
         left = {'id': 1, 'username': 'jdoe'}
         right = {'username': 'jdoe'}
         self.assertTrue(username_filter.are_equal(left, right))
+        self.assertTrue(username_filter.are_equal(left, Traverser(right)))
+        self.assertTrue(username_filter.are_equal(Traverser(left), right))
         self.assertTrue(username_filter.are_equal(Traverser(left), Traverser(right)))
 
     def test_eq_with_filter(self):
@@ -212,22 +216,34 @@ class FilterTests(unittest.TestCase):
         self.assertTrue(left == right)
         self.assertFalse(right == left)
 
-    def test_prune(self):
+    def test_prune_with_blacklist_filter(self):
         id_filter = Filter(blacklist='id')
         obj = {'id': 1, 'username': 'jdoe'}
         id_filter.prune(obj)
         self.assertTrue(obj == {'username': 'jdoe'})
+
+    def test_prune_with_whitelist_filter(self):
+        id_filter = Filter(whitelist='id')
+        obj = {'id': 1, 'username': 'jdoe'}
+        id_filter.prune(obj)
+        self.assertTrue(obj == {'id': 1})
 
     def test_traverser_prune_no_filter(self):
         obj = Traverser({'id': 1, 'username': 'jdoe'})
         obj.prune()
         self.assertTrue(obj() == {'id': 1, 'username': 'jdoe'})
 
-    def test_traverser_prune_with_filter(self):
+    def test_traverser_prune_with_blacklist_filter(self):
         id_filter = Filter(blacklist='id')
         obj = Traverser({'id': 1, 'username': 'jdoe'}, filter=id_filter)
         obj.prune()
         self.assertTrue(obj() == {'username': 'jdoe'})
+
+    def test_traverser_prune_with_whitelist_filter(self):
+        id_filter = Filter(whitelist='id')
+        obj = Traverser({'id': 1, 'username': 'jdoe'}, filter=id_filter)
+        obj.prune()
+        self.assertTrue(obj() == {'id': 1})
 
     def test_traverser_prune_called_with_filter(self):
         id_filter = Filter(blacklist='id')

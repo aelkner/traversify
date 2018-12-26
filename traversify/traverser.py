@@ -189,8 +189,8 @@ class Filter(object):
                 left_keys = [k for k in left_keys if k not in self.blacklist]
                 right_keys = [k for k in right_keys if k not in self.blacklist]
             if self.whitelist:
-                left_keys = [k for k in left_keys if k in self.blacklist]
-                right_keys = [k for k in right_keys if k in self.blacklist]
+                left_keys = [k for k in left_keys if k in self.whitelist]
+                right_keys = [k for k in right_keys if k in self.whitelist]
             if left_keys != right_keys:
                 return False
             for key in left_keys:
@@ -213,7 +213,7 @@ class Filter(object):
             if self.blacklist:
                 keys = [k for k in keys if k not in self.blacklist]
             if self.whitelist:
-                keys = [k for k in keys if k in self.blacklist]
+                keys = [k for k in keys if k in self.whitelist]
             for key in list(value.keys()):
                 if key in keys:
                     self.prune(value[key])
