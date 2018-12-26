@@ -43,6 +43,15 @@ class ConstructorTests(unittest.TestCase):
         self.assertEqual(obj, [])
 
 
+class ConversionToJSONTests(unittest.TestCase):
+
+    def test_to_json(self):
+        obj = Traverser({})
+        self.assertEqual(obj.to_json(), '{}')
+        obj = Traverser([])
+        self.assertEqual(obj.to_json(), '[]')
+
+
 class TraversalTests(unittest.TestCase):
 
     def test_singleton(self):

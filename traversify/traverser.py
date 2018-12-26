@@ -48,6 +48,9 @@ class Traverser(object):
     def __call__(self):
         return self.__traverser__internals__['value']
 
+    def to_json(self):
+        return json.dumps(self())
+
     def __getattr__(self, attr, default=None):
         if '__traverser__internals__' in attr:
             return super(Traverser, self).__getattribute__('__traverser__internals__')
