@@ -87,25 +87,9 @@ class TraversalTests(unittest.TestCase):
         obj = Traverser({'item': {'key': 'value'}})
         self.assertEqual(obj.item, {'key': 'value'})
         self.assertEqual(obj.item.__class__.__name__, 'Traverser')
-        self.assertEqual(obj.__dict__['item'], {'key': 'value'})
-        self.assertEqual(obj.__dict__['item'].__class__.__name__, 'Traverser')
 
 
 class BehaviorTests(unittest.TestCase):
-
-    def test_ide_support(self):
-        obj = Traverser({'item': 'value', 'item_list': [1, 2]})
-        self.assertEqual(obj.__dict__['item'], 'value')
-        self.assertEqual(obj.item, 'value')
-        self.assertEqual(obj.__dict__['item_list'], [1, 2])
-        self.assertEqual(obj.__dict__['item_list'].__class__.__name__, 'Traverser')
-        self.assertEqual(obj.item_list, [1, 2])
-        self.assertEqual(obj.item_list.__class__.__name__, 'Traverser')
-        obj.new_list = [3, 4]
-        self.assertEqual(obj.__dict__['new_list'], [3, 4])
-        self.assertEqual(obj.__dict__['new_list'].__class__.__name__, 'Traverser')
-        self.assertEqual(obj.new_list, [3, 4])
-        self.assertEqual(obj.new_list.__class__.__name__, 'Traverser')
 
     def test_eq(self):
         obj1 = Traverser({'item': 'value'})
@@ -281,6 +265,24 @@ class FilterTests(unittest.TestCase):
         self.assertTrue(obj() == {'id': 1, 'username': 'jdoe'})
         obj.prune(filter=id_filter)
         self.assertTrue(obj() == {'username': 'jdoe'})
+
+
+class IDESupportTests(unittest.TestCase):
+
+    def test_dir_for_list(self):
+        obj = Traverser([])
+        dir_list = sorted([k for k in dir(obj) if not k.startswith('_')])
+        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'prune', 'to_json'])
+
+    def test_dir_for_dict(self):
+        obj = Traverser({'id': 1})
+        dir_list = sorted([k for k in dir(obj) if not k.startswith('_')])
+        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'id', 'prune', 'to_json'])
+
+    def test_dir_not_including_bad_keys(self):
+        obj = Traverser({'id': 1, '@bad': '', 'even.worse': 3})
+        dir_list = sorted([k for k in dir(obj) if not k.startswith('_')])
+        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'id', 'prune', 'to_json'])
 
 
 class CallChainingTests(unittest.TestCase):

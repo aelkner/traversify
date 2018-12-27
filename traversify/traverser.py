@@ -1,5 +1,13 @@
 import json
 import inspect
+import re
+
+
+IDENTIFIER_REGEX = re.compile(r'^[a-zA-Z_]\w*$')
+
+
+def is_identifier(key):
+    return IDENTIFIER_REGEX.match(key) is not None
 
 
 def traversable(value):
@@ -37,11 +45,6 @@ class Traverser(object):
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
         if deepcopy:
             value = recursively_unwrap_value(value)
-        if type(value) == dict:
-            protect_attrs = dir(Traverser)
-            for k, v in value.items():
-                if k not in protect_attrs:
-                    self.__dict__[k] = wrap_value(v)
         self.__traverser__internals__ = {
             'value': value,
             'filter': filter,
@@ -52,6 +55,13 @@ class Traverser(object):
 
     def to_json(self):
         return json.dumps(self())
+
+    def __dir__(self):
+        dir_list = dir(Traverser)
+        value = self()
+        if type(value) == dict:
+            dir_list.extend([k for k in value.keys() if is_identifier(k)])
+        return dir_list
 
     def __getattr__(self, attr, default=None):
         if '__traverser__internals__' in attr:
@@ -96,8 +106,6 @@ class Traverser(object):
 
     def __setitem__(self, index, value):
         self()[index] = recursively_unwrap_value(value)
-        if index not in dir(Traverser):
-            self.__dict__[index] = wrap_value(self()[index])
 
     def __eq__(self, other):
         if self.__traverser__internals__['filter'] is None:
