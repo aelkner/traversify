@@ -46,6 +46,14 @@ Not only  can singletons be addressed as lists, but append and extend methods ar
 [1, 2, 3, 4]
 ```
 
+In case there are keys that are not identifiers, then dictionary dereferencing can still be used:
+
+```pycon
+>>> obj = Traverser({'@xsi.type': 'textarea'})
+>>> obj['@xsi.type']
+'textarea'
+```
+
 At any time, a Traverser instance will return the underlying value when called:
 
 ```pycon
