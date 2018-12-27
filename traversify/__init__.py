@@ -7,7 +7,7 @@ traversify
 
 """
 
-from .traverser import Traverser, Filter
+from .traverser import Traverser, Filter, ensure_list, is_identifier
 from .metadata import (
     __author__,
     __copyright__,
