@@ -121,9 +121,10 @@ class Traverser(object):
         return self
 
     def __contains__(self, item):
-        value = self()
-        item = unwrap_value(item)
-        return item in value
+        for value in self:
+            if value == item:
+                return True
+        return False
 
     def __len__(self):
         value = self()

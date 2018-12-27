@@ -229,6 +229,16 @@ class FilterTests(unittest.TestCase):
         self.assertTrue(left == right)
         self.assertFalse(right == left)
 
+    def test_contains_with_filter(self):
+        id_filter = Filter(blacklist='id')
+        records = Traverser({'id': 1, 'username': 'jdoe'}, filter=id_filter)
+        already_exists_record = Traverser({'username': 'jdoe'})
+        self.assertTrue(already_exists_record in records)
+        self.assertTrue({'username': 'jdoe'} in records)
+        new_record = Traverser({'username': 'foo'})
+        self.assertFalse(new_record in records)
+        self.assertFalse({'username': 'foo'} in records)
+
     def test_prune_with_blacklist_filter(self):
         id_filter = Filter(blacklist='id')
         obj = {'id': 1, 'username': 'jdoe'}
