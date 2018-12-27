@@ -76,7 +76,7 @@ The tree can be updated using dotted syntax.  Note that by default, a Traverser 
 >>> data = {'id': 1, 'username': 'jdoe'}
 >>> obj = Traverser(data)
 >>> obj.id = 2
->>> del obj,username
+>>> del obj.username
 >>> obj()
 {'id': 2}
 >>> data
@@ -115,7 +115,7 @@ The same filter can be used to prune a tree of its unwanted fields:
 {'username': 'jdoe'}
 ```
 
-If a filter is passed while creating a Traverser instance, then '==', 'in'  and the prune method will use it to do the comparison or pruning:
+If a filter is passed while creating a Traverser instance, then `==`, `in` and the `prune()` method will use it to do the comparison or pruning:
 
 ```pycon
 >>> record = Traverser({'id': 1, 'username': 'jdoe'}, filter=Filter(blacklist='id'))
