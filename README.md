@@ -19,7 +19,7 @@ Filter class allows one to:
 
 Pass tree data to Traverser, either as a list, dictionary, json string or any class offering a json method, and the resultant object will provide the syntactic sugar for traversing with dotted syntax, treating singleston nodes as lists:
 
-```angular2html
+```pycon
 >>> from traversify import Traverser
 >>> obj = Traverser({'id': 1, 'username': 'jdoe'})
 >>> obj.id
@@ -38,7 +38,7 @@ True
 
 Not only  can singletons be addressed as lists, but append and extend methods are available to turn singletons into lists on the fly:
 
-```angular2html
+```pycon
 >>> obj = Traverser({'id': 1})
 >>> obj.append({'id': 2})
 >>> obj.extend([{'id': 3, 'id': 4}])
@@ -48,7 +48,7 @@ Not only  can singletons be addressed as lists, but append and extend methods ar
 
 At any time, a Traverser instance will return the underlying value when called:
 
-```angular2html
+```pycon
 >>> obj = Traverser({'id': 1})
 >>> obj()
 {'id': 1}
@@ -56,7 +56,7 @@ At any time, a Traverser instance will return the underlying value when called:
 
 To save the trouble of importing json and using dumps, there's a handy to_json method:
 
-```angular2html
+```pycon
 >>> obj = Traverser({'id': 1})
 >>> obj.to_json()
 '{"id": 1}'
@@ -64,7 +64,7 @@ To save the trouble of importing json and using dumps, there's a handy to_json m
 
 The tree can be updated using dotted syntax.  Note that by default, a Traverser instance makes a deepcopy of the json data so that there are no unintended side effects:
 
-```angular2html
+```pycon
 >>> data = {'id': 1, 'username': 'jdoe'}
 >>> obj = Traverser(data)
 >>> obj.id = 2
@@ -77,7 +77,7 @@ The tree can be updated using dotted syntax.  Note that by default, a Traverser 
 
 However, if the side-effect of updating the data passed is desired (perhaps due to memory constaints), then pass deepcopy=False:
 
-```angular2html
+```pycon
 >>> data = {'id': 1}
 >>> obj = Traverser(data, deepcopy=False)
 >>> obj.id = 2
@@ -91,7 +91,7 @@ However, if the side-effect of updating the data passed is desired (perhaps due 
 
 Often one needs to compare two trees without taking into account irrelavant fields, like when records in the tree have ids, but a new record doesn't have it yet.  Filter provides a way to make this less verbose by providing blacklist and whitelist attributes for controlled comparison:
 
-```angular2html
+```pycon
 >>> from traversify import Traverser, Filter
 >>> id_exclude_filter = Filter(blacklist='id')
 >>> record = Traverser({'id': 1, 'username': 'jdoe'})
@@ -101,7 +101,7 @@ True
 
 The same filter can be used to prune a tree of its unwanted fields:
 
-```angular2html
+```pycon
 >>> id_exclude_filter.prune(record)
 >>> record()
 {'username': 'jdoe'}
@@ -109,7 +109,7 @@ The same filter can be used to prune a tree of its unwanted fields:
 
 If a filter is passed while creating a Traverser instance, then '==', 'in'  and the prune method will use it to do the comparison or pruning:
 
-```angular2html
+```pycon
 >>> record = Traverser({'id': 1, 'username': 'jdoe'}, filter=Filter(blacklist='id'))
 >>> record == {'username': 'jdoe'}
 True
@@ -122,7 +122,7 @@ True
 
 Traverser's prune method will accept a filter to override the default (or supply one not already supplied):
 
-```angular2html
+```pycon
 >>> record = Traverser({'id': 1, 'username': 'jdoe'})
 >>> record.prune(filter=Filter(blacklist='id'))
 >>> record()
