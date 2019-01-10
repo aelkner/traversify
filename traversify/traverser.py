@@ -1,6 +1,7 @@
 import json
 import inspect
 import re
+from copy import copy, deepcopy
 
 
 IDENTIFIER_REGEX = re.compile(r'^[a-zA-Z_]\w*$')
@@ -15,7 +16,7 @@ def traversable(value):
 
 
 def wrap_value(value, deepcopy=False, filter=None):
-    return Traverser(value, deepcopy=deepcopy, filter=filter) if type(value) in [list, dict] else value
+    return Traverser(value, deepcopy=deepcopy, filter=filter) if traversable(value) else value
 
 
 def unwrap_value(value):
@@ -70,7 +71,7 @@ class Traverser(object):
 
     def __setattr__(self, attr, value):
         if '__traverser__internals__' in attr:
-            super(Traverser, self).__setattr__('__traverser__internals__',  value)
+            super(Traverser, self).__setattr__('__traverser__internals__', value)
         else:
             self[attr] = value
 
@@ -162,7 +163,7 @@ class Traverser(object):
         if type(value) == list:
             result = []
             for value in value:
-                result.append(Traverser(value) if traversable(value) else value)
+                result.append(wrap_value(value))
             return iter(result)
         else:
             return iter([self])
@@ -170,7 +171,7 @@ class Traverser(object):
     def __add__(self, item):
         value = ensure_list(self())
         item = ensure_list(unwrap_value(item))
-        return Traverser(value + item)
+        return wrap_value(value + item)
 
     def __copy__(self):
         return Traverser(copy(self()))
