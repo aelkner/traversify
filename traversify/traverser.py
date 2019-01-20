@@ -11,12 +11,8 @@ def is_identifier(key):
     return IDENTIFIER_REGEX.match(key) is not None
 
 
-def traversable(value):
-    return type(value) in [list, dict]
-
-
 def wrap_value(value, deepcopy=False, filter=None):
-    return Traverser(value, deepcopy=deepcopy, filter=filter) if traversable(value) else value
+    return Traverser(value, deepcopy=deepcopy, filter=filter) if isinstance(value, (list, dict)) else value
 
 
 def unwrap_value(value):
@@ -42,7 +38,7 @@ class Traverser(object):
             value = value.json()
         if type(value) == type(""):
             value = json.loads(value)
-        if not traversable(value):
+        if not isinstance(value, (list, dict)):
             raise ValueError("Only list or dict types allowed: '{}'".format(value))
         if deepcopy:
             value = recursively_unwrap_value(value)
