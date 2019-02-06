@@ -16,11 +16,11 @@ setup(
     license=traversify.__license__,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    description='Handy python wrapper class for json data that makes it easier to traverse to items and list elements.',
+    description='Handy python classes for manipulating json data, providing syntactic sugar for less verbose, easier to write code.',
     author=traversify.__author__,
     author_email=traversify.__email__,
     packages=['traversify'],
     test_suite='traversify.tests',
     use_2to3=True,
-    package_data={'': ['LICENSE', 'README.rst']}
+    package_data={'': ['LICENSE', 'README.md']}
 )
