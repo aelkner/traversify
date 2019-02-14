@@ -32,6 +32,28 @@ def ensure_list(value):
     return value if type(value) == list else [value]
 
 
+def split_escaped(path):
+    return [k.replace('KQypbNUMED', '.') for
+            k in path.replace('..', 'KQypbNUMED').split('.')]
+
+
+def traverse_path_part(value, part, default=None):
+    if part.isdigit():
+        return value[int(part)]
+    else:
+        return value.get(part, default)
+
+
+def buildout_path(parts, new_value):
+    new_path = new_value
+    for part in reversed(parts):
+        if part.isdigit():
+            new_path = [new_path]
+        else:
+            new_path = {part: new_path}
+    return new_path
+
+
 class Traverser(object):
     def __init__(self, value, deepcopy=True, filter=None):
         if hasattr(value, 'json') and inspect.ismethod(value.json):
@@ -72,11 +94,39 @@ class Traverser(object):
             self[attr] = value
 
     def __repr__(self):
-        return 'Traverser({})'.format(self())
+        return 'Traverser({})'.format(json.dumps(self(), indent=2, default=str))
+
+    def __str__(self):
+        return 'Traverser({})'.format(json.dumps(self(), indent=2, default=str))
 
     def get(self, attr, default=None):
-        value = self().get(attr, default)
+        parts = split_escaped(attr)
+        value = traverse_path_part(self(), parts[0], default=default)
+        for part in parts[1:]:
+            if not isinstance(value, (list, dict)):
+                return None
+            value = traverse_path_part(value, part, default=default)
+            if value is None:
+                return None
         return wrap_value(value)
+
+    def set(self, attr, new_value):
+        parts = split_escaped(attr)
+        current_value = self()
+        for index, part in enumerate(parts[:-1]):
+            try:
+                value = traverse_path_part(current_value, part)
+                if value is None:
+                    break
+            except Exception:
+                break
+            current_value = value
+        else:
+            wrapped_value = wrap_value(current_value)
+            wrapped_value[parts[-1]] = new_value
+            return
+        wrapped_value = wrap_value(current_value)
+        wrapped_value[part] = buildout_path(parts[index+1:], new_value)
 
     def ensure_list(self, item):
         value = self.get(item)

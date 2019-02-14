@@ -46,6 +46,14 @@ Not only  can singletons be addressed as lists, but append and extend methods ar
 [1, 2, 3, 4]
 ```
 
+At any time, a Traverser instance will return the underlying value when called:
+
+```pycon
+>>> obj = Traverser({'id': 1})
+>>> obj()
+{'id': 1}
+```
+
 In case there are keys that are not identifiers, then dictionary dereferencing can still be used:
 
 ```pycon
@@ -54,12 +62,21 @@ In case there are keys that are not identifiers, then dictionary dereferencing c
 'textarea'
 ```
 
-At any time, a Traverser instance will return the underlying value when called:
+Also, the get method will receive a path that supports dot-escaping so that such keys can be traversed:
 
 ```pycon
->>> obj = Traverser({'id': 1})
+>>> obj = Traverser({'@xsi.type': 'textarea'})
+>>> obj.get('@xsi..type')
+'textarea'
+```
+
+Additionally, there's a set method that will even build out branches that aren't already there:
+
+```pycon
+>>> obj = Traverser({'id': i})
+>>> obj.set('users.0.username', 'any')
 >>> obj()
-{'id': 1}
+{'id': 1, 'users': [{'username': 'any'}]}
 ```
 
 To save the trouble of importing json and using dumps, there's a handy to_json method:

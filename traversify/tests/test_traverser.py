@@ -282,17 +282,17 @@ class IDESupportTests(unittest.TestCase):
     def test_dir_for_list(self):
         obj = Traverser([])
         dir_list = sorted([k for k in dir(obj) if not k.startswith('_')])
-        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'prune', 'to_json'])
+        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'prune', 'set', 'to_json'])
 
     def test_dir_for_dict(self):
         obj = Traverser({'id': 1})
         dir_list = sorted([k for k in dir(obj) if not k.startswith('_')])
-        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'id', 'prune', 'to_json'])
+        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'id', 'prune', 'set', 'to_json'])
 
     def test_dir_not_including_bad_keys(self):
         obj = Traverser({'id': 1, '@bad': '', 'even.worse': 3})
         dir_list = sorted([k for k in dir(obj) if not k.startswith('_')])
-        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'id', 'prune', 'to_json'])
+        self.assertEqual(dir_list, ['append', 'ensure_list', 'extend', 'get', 'id', 'prune', 'set', 'to_json'])
 
 
 class CallChainingTests(unittest.TestCase):
@@ -308,6 +308,64 @@ class CallChainingTests(unittest.TestCase):
     def test_extend_call_chain(self):
         obj = Traverser([])
         self.assertTrue(obj.extend([]) is obj)
+
+
+class GetTests(unittest.TestCase):
+
+    def test_get_finds_node(self):
+        value = {
+            'root': {'users': [{'username': 'jdoe'}]}
+        }
+        obj = Traverser(value)
+        self.assertEqual(obj.get('root.users')(), [{'username': 'jdoe'}])
+
+    def test_get_traverses_list(self):
+        value = {
+            'root': {'users': [{'username': 'jdoe'}]}
+        }
+        obj = Traverser(value)
+        self.assertEqual(obj.get('root.users.0.username'), 'jdoe')
+
+    def test_get_forgives_missing_node(self):
+        value = {
+            'root': {'users': [{'username': 'jdoe'}]}
+        }
+        obj = Traverser(value)
+        self.assertIsNone(obj.get('root.places'))
+
+    def test_get_supports_dot_escaping(self):
+        value = {
+            'root': {'@xsi.type': 'field'}
+        }
+        obj = Traverser(value)
+        self.assertEqual(obj.get('root.@xsi..type'), 'field')
+
+
+class SetTests(unittest.TestCase):
+
+    def test_set_updates_existing_node(self):
+        value = {
+            'root': {'users': [{'username': 'jdoe'}]}
+        }
+        obj = Traverser(value)
+        obj.set('root.users', 'any')
+        self.assertEqual(obj.get('root.users'), 'any')
+
+    def test_set_creates_new_branch(self):
+        value = {
+            'root': {'stuff': {'users': [{'username': 'jdoe'}]}}
+        }
+        obj = Traverser(value)
+        obj.set('root.stuff.parts.auto', 'any')
+        self.assertEqual(obj.get('root.stuff.parts.auto'), 'any')
+
+    def test_set_creates_list(self):
+        value = {
+            'root': {'stuff': {'users': [{'username': 'jdoe'}]}}
+        }
+        obj = Traverser(value)
+        obj.set('root.stuff.parts.0.auto', 'any')
+        self.assertEqual(obj.get('root.stuff.parts.0.auto'), 'any')
 
 
 if __name__ == '__main__':
