@@ -138,7 +138,7 @@ class Traverser(object):
 
     def __getitem__(self, index):
         if type(index) == type(''):
-            return self.get(index)
+            return self().get(index)
         else:
             value = self()
             if type(value) != list:

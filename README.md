@@ -54,39 +54,6 @@ At any time, a Traverser instance will return the underlying value when called:
 {'id': 1}
 ```
 
-In case there are keys that are not identifiers, then dictionary dereferencing can still be used:
-
-```pycon
->>> obj = Traverser({'@xsi.type': 'textarea'})
->>> obj['@xsi.type']
-'textarea'
-```
-
-Also, the get method will receive a path that supports dot-escaping so that such keys can be traversed:
-
-```pycon
->>> obj = Traverser({'@xsi.type': 'textarea'})
->>> obj.get('@xsi..type')
-'textarea'
-```
-
-Additionally, there's a set method that will even build out branches that aren't already there:
-
-```pycon
->>> obj = Traverser({'id': i})
->>> obj.set('users.0.username', 'any')
->>> obj()
-{'id': 1, 'users': [{'username': 'any'}]}
-```
-
-To save the trouble of importing json and using dumps, there's a handy to_json method:
-
-```pycon
->>> obj = Traverser({'id': 1})
->>> obj.to_json()
-'{"id": 1}'
-```
-
 The tree can be updated using dotted syntax.  Note that by default, a Traverser instance makes a deepcopy of the json data so that there are no unintended side effects:
 
 ```pycon
@@ -110,6 +77,49 @@ However, if the side-effect of updating the data passed is desired (perhaps due 
 {'id': 2}
 >>> data
 {'id': 2}
+```
+
+In case there are keys that are not identifiers, then dictionary dereferencing can still be used:
+
+```pycon
+>>> obj = Traverser({'@xsi.type': 'textarea'})
+>>> obj['@xsi.type']
+'textarea'
+```
+
+The get method allows traversing multiple levels in one call, using dots to set off the levels:
+```pycon
+>>> obj = Traverser({'root': {'username': 'any'}})
+>>> obj.get('root.username')
+'any'
+```
+
+Also, the get method supports dot-escaping so that keys containing dots can still be traversed:
+
+```pycon
+>>> obj = Traverser({'@xsi.type': 'textarea'})
+>>> obj.get('@xsi..type')
+'textarea'
+```
+
+There's a set method that will update a node multiple levels down and even build out branches that aren't already there:
+
+```pycon
+>>> obj = Traverser({'stats': {'id': 1}})
+>>> obj.set('stats.id', 2)
+>>> obj()
+{'stats': {'id': 2}}
+>>> obj.set('users.0.username', 'any')
+>>> obj()
+{'stats': {'id': 2}, 'users': [{'username': 'any'}]}
+```
+
+To save the trouble of importing json and using dumps, there's a handy to_json method:
+
+```pycon
+>>> obj = Traverser({'id': 1})
+>>> obj.to_json()
+'{"id": 1}'
 ```
 
 # Filter
