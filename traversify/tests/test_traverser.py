@@ -87,6 +87,8 @@ class TraversalTests(unittest.TestCase):
         obj = Traverser({'item': {'key': 'value'}})
         self.assertEqual(obj.item, {'key': 'value'})
         self.assertEqual(obj.item.__class__.__name__, 'Traverser')
+        self.assertEqual(obj['item'], {'key': 'value'})
+        self.assertEqual(obj['item'].__class__.__name__, 'Traverser')
 
     def test_getitem_does_not_use_get(self):
         obj = Traverser({'@xsi.type': 'value'})

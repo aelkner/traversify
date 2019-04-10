@@ -138,7 +138,7 @@ class Traverser(object):
 
     def __getitem__(self, index):
         if type(index) == type(''):
-            return self().get(index)
+            value = self().get(index)
         else:
             value = self()
             if type(value) != list:
@@ -149,7 +149,7 @@ class Traverser(object):
                 value = value[start:stop]
             else:
                 value = value[index]
-            return wrap_value(value)
+        return wrap_value(value)
 
     def __setitem__(self, index, value):
         self()[index] = recursively_unwrap_value(value)
