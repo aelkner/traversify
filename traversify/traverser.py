@@ -37,7 +37,11 @@ def split_escaped(path):
             k in path.replace('..', 'KQypbNUMED').split('.')]
 
 
-def traverse_path_part(value, part, default=None):
+def traverse_path_part(value, part, parts, index, default=None):
+    if isinstance(value, list) and not part.isdigit():
+        successful_parts = parts[:index + 1]
+        msg = "Unable to traverse list via key, '{}', after traversing {}".format(part, successful_parts)
+        raise ValueError(msg)
     if part.isdigit():
         return value[int(part)]
     else:
@@ -101,11 +105,11 @@ class Traverser(object):
 
     def get(self, attr, default=None):
         parts = split_escaped(attr)
-        value = traverse_path_part(self(), parts[0], default=default)
-        for part in parts[1:]:
+        value = traverse_path_part(self(), parts[0], parts, 0, default=default)
+        for index, part in enumerate(parts[1:]):
             if not isinstance(value, (list, dict)):
                 return None
-            value = traverse_path_part(value, part, default=default)
+            value = traverse_path_part(value, part, parts, index, default=default)
             if value is None:
                 return None
         return wrap_value(value)
@@ -115,7 +119,7 @@ class Traverser(object):
         current_value = self()
         for index, part in enumerate(parts[:-1]):
             try:
-                value = traverse_path_part(current_value, part)
+                value = traverse_path_part(current_value, part, parts, index)
                 if value is None:
                     break
             except Exception:

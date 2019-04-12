@@ -345,6 +345,17 @@ class GetTests(unittest.TestCase):
         obj = Traverser(value)
         self.assertEqual(obj.get('root.@xsi..type'), 'field')
 
+    def test_get_raises_better_list_access_exception(self):
+        obj = Traverser([])
+        with self.assertRaises(ValueError):
+            obj.get('bad')
+        value = {
+            'root': []
+        }
+        obj = Traverser(value)
+        with self.assertRaises(ValueError):
+            obj.get('root.bad')
+
 
 class SetTests(unittest.TestCase):
 
