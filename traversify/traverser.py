@@ -131,6 +131,11 @@ class Traverser(object):
             return
         wrapped_value = wrap_value(current_value)
         wrapped_value[part] = buildout_path(parts[index+1:], new_value)
+        
+    def items(self):
+        if type(self()) == list:
+            return [wrap_value(x) for x in self()]
+        return [(key, wrap_value(subtree)) for key, subtree in self().items()]
 
     def ensure_list(self, item):
         value = self.get(item)
@@ -216,7 +221,7 @@ class Traverser(object):
                 result.append(wrap_value(value))
             return iter(result)
         else:
-            return iter([self])
+            return iter([wrap_value(x) for x in self().values()])
 
     def __add__(self, item):
         value = ensure_list(self())
