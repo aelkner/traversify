@@ -59,7 +59,7 @@ def buildout_path(parts, new_value):
 
 
 class Traverser(object):
-    def __init__(self, value, deepcopy=True, filter=None, subTree=None):
+    def __init__(self, value, deepcopy=True, filter=None):
         if hasattr(value, 'json') and inspect.ismethod(value.json):
             value = value.json()
         if type(value) == type(""):
