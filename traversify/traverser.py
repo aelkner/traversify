@@ -243,15 +243,20 @@ class Traverser(object):
         new_dict={}
         for key in key_list:
             if hasattr(self, key):
-                key_dict = self.subTree(key)()
-                new_dict.update(key_dict)
+                if isinstance(self.subTree(key), str):
+                    re.split('/.', key)
+                    new_dict.update({re.split('\.',key)[-1]: self.subTree(key)})
+                elif isinstance(self.subTree(key), self):
+                    key_dict = self.subTree(key)()
+                    new_dict.update({re.split('\.',key)[-1]: self.subTree(key)()})
         return Traverser(new_dict)
     
     def prune(self, key_list: list):
-        # black list only
+        # Only black list
         for key in key_list:
             if hasattr(self, key):
                 delattr(self, key)
+        return self
 
 
 class Filter(object):

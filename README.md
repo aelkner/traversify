@@ -168,6 +168,54 @@ extract list of subtree's and query using list comprehension :
 })]
 ```
 
+filter a tree (whitelist)
+
+```pycon
+>>> Traverser(data).filter(['source.0.annotations.source_name', 'source.0.annotations.topic', 'source.0.annotations.subtopic'])
+Traverser({
+  "source_name": "Census Bureau",
+  "topic": "Diversity",
+  "subtopic": "Demographics"
+})
+```
+extract list of subtree's and query using list comprehension, filter nation and year
+```pycon
+>>> [data.filter(['Year','Nation']) for data in Traverser(data).subTreeArray("data")]
+[Traverser({
+  "Year": "2020",
+  "Nation": "United States"
+}), Traverser({
+  "Year": "2019",
+  "Nation": "United States"
+}), Traverser({
+  "Year": "2018",
+  "Nation": "United States"
+}),
+...]
+```
+
+extract list of subtree's and query using list comprehension, prune out ID Nation and ID Year
+```pycon
+>>> [data.prune(['ID Nation','ID Year']) for data in Traverser(data).subTreeArray("data")]
+[Traverser({
+  "Nation": "United States",
+  "Year": "2020",
+  "Population": 326569308,
+  "Slug Nation": "united-states"
+}), Traverser({
+  "Nation": "United States",
+  "Year": "2019",
+  "Population": 324697795,
+  "Slug Nation": "united-states"
+}), Traverser({
+  "Nation": "United States",
+  "Year": "2018",
+  "Population": 322903030,
+  "Slug Nation": "united-states"
+})
+...]
+```
+
 # Filter
 
 Often one needs to compare two trees without taking into account irrelavant fields, like when records in the tree have ids, but a new record doesn't have it yet.  Filter provides a way to make this less verbose by providing blacklist and whitelist attributes for controlled comparison:

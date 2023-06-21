@@ -13,13 +13,13 @@ data = requests.get("https://datausa.io/api/data?drilldowns=Nation&measures=Popu
 print(data)
 
 # filter
-source = Traverser(data).subTree('source.0.annotations')
+source = Traverser(data).filter(['source.0.annotations.source_name', 'source.0.annotations.topic', 'source.0.annotations.subtopic'])
 print(source)
 
-#extract list of subtree's 
-data_list = Traverser(data).subTreeArray("data")
-print(data_list[0])
+# extract list of subtree's and query using list comprehension, filter nation and year
+data_list = [data.filter(['Year','Nation']) for data in Traverser(data).subTreeArray("data")]
+print(data_list)
 
-# extract list of subtree's and query using list comprehension
-data_list = [data for data in Traverser(data).subTreeArray("data") if data.Year == "2020"]
+# extract list of subtree's and query using list comprehension, filter nation and year
+data_list = [data.prune(['ID Nation','ID Year']) for data in Traverser(data).subTreeArray("data")]
 print(data_list)
