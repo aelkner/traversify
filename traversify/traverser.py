@@ -229,14 +229,30 @@ class Traverser(object):
     def __deepcopy__(self, memo):
         return Traverser(deepcopy(self()))
     
-    def subTree(self, key):
+    def subTree(self, key: str):
         return getattr(self,key)
     
-    def subTreeArray(self, key):
-        if isinstance(getattr(self,key)(), list):
+    def subTreeArray(self, key:str):
+        if isinstance(self.subTree(key)(), list):
             return([Traverser(obj) for obj in getattr(self,key)()])
         else:
             return self
+    
+    def filter(self, key_list: list):
+        # white list only
+        new_dict={}
+        for key in key_list:
+            if hasattr(self, key):
+                key_dict = self.subTree(key)()
+                new_dict.update(key_dict)
+        return Traverser(new_dict)
+    
+    def prune(self, key_list: list):
+        # black list only
+        for key in key_list:
+            if hasattr(self, key):
+                delattr(self, key)
+
 
 class Filter(object):
     def __init__(self, blacklist=None, whitelist=None):
