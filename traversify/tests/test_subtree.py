@@ -14,14 +14,17 @@ print(data)
 
 # extract subtree of sources
 source = Traverser(data).subTree('source.0.annotations')
+print('source')
 print(source)
 
 #extract list of subtree's 
 data_list = Traverser(data).subTreeArray("data")
+print('datalist')
 print(data_list[0])
 
 # extract list of subtree's and query using list comprehension
 data_list = [data for data in Traverser(data).subTreeArray("data") if data.Year == "2020"]
+print('data list')
 print(data_list)
 
 

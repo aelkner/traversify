@@ -122,6 +122,52 @@ To save the trouble of importing json and using dumps, there's a handy to_json m
 '{"id": 1}'
 ```
 
+Example:
+``data = requests.get("https://datausa.io/api/data?drilldowns=Nation&measures=Population").json()``
+
+extract subtree of sources:
+
+```pycon
+>>> Traverser(data).subTree('source.0.annotations')
+Traverser({
+  "source_name": "Census Bureau",
+  "source_description": "The American Community Survey (ACS) is conducted by the US Census and sent to a portion of the population every year.",
+  "dataset_name": "ACS 5-year Estimate",
+  "dataset_link": "http://www.census.gov/programs-surveys/acs/",
+  "table_id": "B01003",
+  "topic": "Diversity",
+  "subtopic": "Demographics"
+})
+```
+
+extract list of subtree's :
+
+```pycon
+>>> Traverser(data).subTreeArray("data")[0]
+Traverser({
+  "ID Nation": "01000US",
+  "Nation": "United States",
+  "ID Year": 2020,
+  "Year": "2020",
+  "Population": 326569308,
+  "Slug Nation": "united-states"
+})
+```
+
+extract list of subtree's and query using list comprehension :
+
+```pycon
+>>> [data for data in Traverser(data).subTreeArray("data") if data.Year == "2020"]
+[Traverser({
+  "ID Nation": "01000US",
+  "Nation": "United States",
+  "ID Year": 2020,
+  "Year": "2020",
+  "Population": 326569308,
+  "Slug Nation": "united-states"
+})]
+```
+
 # Filter
 
 Often one needs to compare two trees without taking into account irrelavant fields, like when records in the tree have ids, but a new record doesn't have it yet.  Filter provides a way to make this less verbose by providing blacklist and whitelist attributes for controlled comparison:
