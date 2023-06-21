@@ -228,7 +228,15 @@ class Traverser(object):
 
     def __deepcopy__(self, memo):
         return Traverser(deepcopy(self()))
-
+    
+    def subTree(self, key):
+        return getattr(self,key)
+    
+    def subTreeArray(self, key):
+        if isinstance(getattr(self,key)(), list):
+            return([Traverser(obj) for obj in getattr(self,key)()])
+        else:
+            return self
 
 class Filter(object):
     def __init__(self, blacklist=None, whitelist=None):
